@@ -1,0 +1,115 @@
+(*-----Basic Rules-----*)
+(* A digit is any number from 0 to 9. *)
+digit      = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+(* A letter is any uppercase or lowercase English letter. *)
+letter     = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" |
+             "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" |
+             "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" |
+             "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" ;
+
+(* Identifiers are variable and function names. *)
+(* They must start with a letter and can contain letters, digits, or underscores. *)
+identifier = letter , { letter | digit | "_" } ;
+
+(* Numbers consist of digits and may have a decimal point. *)
+number     = digit , { digit } , [ "." , digit , { digit } ] ;
+
+(* Strings are enclosed in double quotes and can contain any character except another quote. *)
+string     = '"' , { any-character - '"' } , '"' ;
+
+(* Boolean values can be either true or false. *)
+boolean    = "true" | "false" ;
+
+(* The "nil" keyword represents a null or undefined value. *)
+nil        = "nil" ;
+
+
+
+(*-----Keywords-----*)
+(* Keywords are special reserved words that have predefined meanings. *)
+keyword = "and" | "break" | "continue" | "do" | "else" | "elseif" | "false" | "for" | 
+          "func" | "if" | "nil" | "or" | "return" | "true" | "var" | "while" ;
+
+
+
+(*-----Expressions-----*)
+(* An expression starts with logical OR, which consists of logical AND operations. *)
+expression = logic-or ;
+
+(* Logical OR expressions are composed of one or more logical AND expressions. *)
+logic-or   = logic-and , { "or" , logic-and } ;
+
+(* Logical AND expressions are composed of one or more equality expressions. *)
+logic-and  = equality , { "and" , equality } ;
+
+(* Equality expressions compare two values and return true or false. *)
+equality   = comparison , { ( "==" | "!=" ) , comparison } ;
+
+(* Comparison expressions compare values using relational operators. *)
+comparison = term , { ( "<" | "<=" | ">" | ">=" ) , term } ;
+
+(* Term expressions involve addition and subtraction. *)
+term       = factor , { ( "+" | "-" ) , factor } ;
+
+(* Factor expressions involve multiplication, division, and modulo. *)
+factor     = unary , { ( "*" | "/" | "%" ) , unary } ;
+
+(* Unary expressions handle negation and logical NOT. *)
+unary      = [ "!" | "-" ] , primary ;
+
+(* Primary expressions include literals, variables, and grouped expressions. *)
+primary    = number | string | boolean | nil | identifier | "(" , expression , ")" ;
+
+
+
+(*-----Statements-----*)
+(* A statement can be an expression, a block, an if-statement, a loop, or a return. *)
+statement      = expr-stmt | block | if-stmt | while-stmt | for-stmt | do-while-stmt | return-stmt ;
+
+(* Expression statements execute an expression and end with a semicolon. *)
+expr-stmt      = expression , ";" ;
+
+(* A block groups multiple statements inside curly braces. *)
+block          = "{" , { statement } , "}" ;
+
+(* If-Else statement allows conditional execution of code. *)
+if-stmt        = "if" , "(" , expression , ")" , statement , 
+                 [ "elseif" , "(" , expression , ")" , statement ] , 
+                 [ "else" , statement ] ;
+
+(* While loop executes a block repeatedly while a condition is true. *)
+while-stmt     = "while" , "(" , expression , ")" , statement ;
+
+(* For loop consists of an initializer, a condition, and an update expression. *)
+for-stmt       = "for" , "(" , [ var-decl | expr-stmt ] , [ expression ] , ";" , [ expression ] , ")" , statement ;
+
+(* Do-While loop executes a block at least once before checking the condition. *)
+do-while-stmt  = "do" , statement , "while" , "(" , expression , ")" , ";" ;
+
+(* Return statement exits a function and optionally returns a value. *)
+return-stmt    = "return" , [ expression ] , ";" ;
+
+
+
+(*-----Function Declarations-----*)
+(* A function declaration consists of a name, parameters, and a block of statements. *)
+func-decl = "func" , identifier , "(" , [ parameters ] , ")" , block ;
+
+(* Parameters are comma-separated variable names passed to a function. *)
+parameters = identifier , { "," , identifier } ;
+
+
+
+(*-----Variable Declarations-----*)
+(* A variable declaration assigns a value to a variable. *)
+var-decl = "var" , identifier , [ "=" , expression ] , ";" ;
+
+
+
+(*-----Program Structure-----*)
+(* A program consists of multiple declarations. *)
+program = { declaration } ;
+
+(* A declaration can be a function, a variable, or a statement. *)
+declaration = func-decl | var-decl | statement ;

@@ -1,0 +1,22 @@
+# CMake build files
+build/
+build_tests/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+# Editor-specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Binary files
+*.o
+*.so
+*.a
+*.out
+*.exe
+delirium
+delirium_tests
