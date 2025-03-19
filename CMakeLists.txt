@@ -18,10 +18,15 @@ endif()
 # Add source files
 set(SOURCES
     src/main.cpp
+    src/chunk.cpp
+    src/memory.cpp
 )
 
 set(HEADERS
     include/lexer.h
+    include/chunk.h
+    include/common.h
+    include/memory.h
 )
 
 # Define executable
