@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/home/jellyfish/Dev/Delirium/build",
+  "command": "/usr/bin/clang++  -I/home/jellyfish/Dev/Delirium/include -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles/delirium.dir/src/main.cpp.o -c /home/jellyfish/Dev/Delirium/src/main.cpp",
+  "file": "/home/jellyfish/Dev/Delirium/src/main.cpp",
+  "output": "CMakeFiles/delirium.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/jellyfish/Dev/Delirium/build",
+  "command": "/usr/bin/clang++  -I/home/jellyfish/Dev/Delirium/include -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles/delirium.dir/src/chunk.cpp.o -c /home/jellyfish/Dev/Delirium/src/chunk.cpp",
+  "file": "/home/jellyfish/Dev/Delirium/src/chunk.cpp",
+  "output": "CMakeFiles/delirium.dir/src/chunk.cpp.o"
+},
+{
+  "directory": "/home/jellyfish/Dev/Delirium/build",
+  "command": "/usr/bin/clang++  -I/home/jellyfish/Dev/Delirium/include -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles/delirium.dir/src/memory.cpp.o -c /home/jellyfish/Dev/Delirium/src/memory.cpp",
+  "file": "/home/jellyfish/Dev/Delirium/src/memory.cpp",
+  "output": "CMakeFiles/delirium.dir/src/memory.cpp.o"
+}
+]
