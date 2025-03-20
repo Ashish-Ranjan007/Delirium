@@ -21,6 +21,7 @@ set(SOURCES
     src/chunk.cpp
     src/memory.cpp
     src/debug.cpp
+    src/value.cpp
 )
 
 set(HEADERS
@@ -29,6 +30,7 @@ set(HEADERS
     include/common.h
     include/memory.h
     include/debug.h
+    include/value.h
 )
 
 # Define executable
