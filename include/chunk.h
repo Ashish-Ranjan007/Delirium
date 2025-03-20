@@ -20,11 +20,12 @@ typedef struct Chunk {
     int capacity;         // Total allocated size of the code array.
     uint8_t* code;        // Each byte in this dynacmically allocated array represents a single bytecode instruction.
     ValueArray constants; // Stores a pool of constants or the "constant pool".
+    int* lines;           // Each index in this array is the line number for the corresponding byte in the bytecode.
 } Chunk;
 
-void initChunk(Chunk* chunk);                // Initialize new chunk
-void writeChunk(Chunk* chunk, uint8_t byte); // Append a new byte to the end of the chunk
-void freeChunk(Chunk* chunk);                // Free Chunk of memory
-int addConstant(Chunk* chunk, Value value);  //  Add a new constant to the constant pool
+void initChunk(Chunk* chunk);                          // Initialize new chunk
+void writeChunk(Chunk* chunk, uint8_t byte, int line); // Append a new byte to the end of the chunk
+void freeChunk(Chunk* chunk);                          // Free Chunk of memory
+int addConstant(Chunk* chunk, Value value);            //  Add a new constant to the constant pool
 
 #endif
