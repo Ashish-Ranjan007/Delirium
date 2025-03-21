@@ -23,6 +23,8 @@ set(SOURCES
     src/debug.cpp
     src/value.cpp
     src/vm.cpp
+    src/compiler.cpp
+    src/lexer.cpp
 )
 
 set(HEADERS
@@ -33,6 +35,8 @@ set(HEADERS
     include/debug.h
     include/value.h
     include/vm.h
+    include/compiler.h 
+    include/lexer.h
 )
 
 # Define executable

@@ -19,9 +19,9 @@ typedef enum InterpretResult {
     INTERPRET_RUNTIME_ERROR
 } InterpretResult;
 
-void initVM();                           // Initialize a virtual machine
-void freeVM();                           // Destroy a virtual machine
-InterpretResult interpret(Chunk* chunk); // Main entry point into the VM
+void initVM();                                 // Initialize a virtual machine
+void freeVM();                                 // Destroy a virtual machine
+InterpretResult interpret(char const* source); // Main entry point into the VM
 void push(Value value);
 Value pop();
 
