@@ -22,6 +22,7 @@ set(SOURCES
     src/memory.cpp
     src/debug.cpp
     src/value.cpp
+    src/vm.cpp
 )
 
 set(HEADERS
@@ -31,6 +32,7 @@ set(HEADERS
     include/memory.h
     include/debug.h
     include/value.h
+    include/vm.h
 )
 
 # Define executable
