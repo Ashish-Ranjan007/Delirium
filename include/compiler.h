@@ -1,6 +1,8 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
-void compile(char const* source);
+#include "chunk.h"
+
+bool compile(char const* source, Chunk* chunk);
 
 #endif

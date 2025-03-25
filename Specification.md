@@ -2,13 +2,13 @@
 
 ## Keywords
 
-The Delirium programming language reserves a specific collection of sixteen words, each designated for particular syntactic purposes within the language's structure. These keywords are fundamental components of Delirium's grammar, and their use is strictly defined to ensure proper interpretation and execution of code.
+The Delirium programming language reserves a specific collection of fourteen words, each designated for particular syntactic purposes within the language's structure. These keywords are fundamental components of Delirium's grammar, and their use is strictly defined to ensure proper interpretation and execution of code.
 
 ```
-and         break       continue        do
-else        elseif      false           for
-func        if          nil             or
-return      true        var             while
+and         break       continue        else        
+false       for         func            if          
+nil         or          return          true        
+var         while
 ```
 
 ## Features
