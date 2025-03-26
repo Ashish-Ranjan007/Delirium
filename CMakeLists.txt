@@ -25,6 +25,7 @@ set(SOURCES
     src/vm.cpp
     src/compiler.cpp
     src/lexer.cpp
+    src/object.cpp
 )
 
 set(HEADERS
@@ -37,6 +38,7 @@ set(HEADERS
     include/vm.h
     include/compiler.h 
     include/lexer.h
+    include/object.h
 )
 
 # Define executable

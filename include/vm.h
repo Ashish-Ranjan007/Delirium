@@ -11,6 +11,7 @@ typedef struct VM {
     uint8_t* ip; // Instruction Pointer or Program Counter
     Value stack[STACK_MAX];
     Value* stackTop;
+    Obj* objects;
 } VM;
 
 typedef enum InterpretResult {
@@ -18,6 +19,8 @@ typedef enum InterpretResult {
     INTERPRET_COMPILE_ERROR,
     INTERPRET_RUNTIME_ERROR
 } InterpretResult;
+
+extern VM vm; // Makes it a global variable
 
 void initVM();                                 // Initialize a virtual machine
 void freeVM();                                 // Destroy a virtual machine
