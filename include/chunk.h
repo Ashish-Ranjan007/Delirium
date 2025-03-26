@@ -7,10 +7,17 @@
 // 1-byte instruction set architecture for the Virtual Machine
 typedef enum Opcode {
     OP_CONSTANT,
+    OP_NIL,
+    OP_TRUE,
+    OP_FALSE,
+    OP_EQUAL,
+    OP_GREATER,
+    OP_LESS,
     OP_ADD,
     OP_SUBTRACT,
     OP_MULTIPLY,
     OP_DIVIDE,
+    OP_NOT,
     OP_MODULO,
     OP_NEGATE,
     OP_RETURN,
