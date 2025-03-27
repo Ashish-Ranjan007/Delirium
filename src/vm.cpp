@@ -39,10 +39,12 @@ void initVM()
 {
     resetStack();
     vm.objects = NULL;
+    initTable(&vm.strings);
 }
 
 void freeVM()
 {
+    freeTable(&vm.strings);
     freeObjects();
 }
 
@@ -147,7 +149,7 @@ static InterpretResult run()
                 // double b = AS_NUMBER(pop());
                 // double a = AS_NUMBER(pop());
                 //  push(NUMBER_VAL(a + b));
-                
+
                 // Approach 2
                 BINARY_OP(NUMBER_VAL, +);
             } else {
