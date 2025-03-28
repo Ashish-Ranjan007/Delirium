@@ -12,6 +12,7 @@ typedef struct VM {
     uint8_t* ip; // Instruction Pointer or Program Counter
     Value stack[STACK_MAX];
     Value* stackTop;
+    Table globals;
     Table strings;
     Obj* objects;
 } VM;
