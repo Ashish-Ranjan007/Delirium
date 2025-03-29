@@ -2,7 +2,8 @@
 #define COMPILER_H
 
 #include "chunk.h"
+#include "object.h"
 
-bool compile(char const* source, Chunk* chunk);
+ObjFunction* compile(char const* source);
 
 #endif
