@@ -1,34 +1,50 @@
-#include <cstdint>
-#include <cstring>
-#include <iostream>
-#include <memory.h>
-#include <stdarg.h>
-#include <string>
-#include <time.h>
+#include <cstdint>  // For integer types
+#include <cstring>  // For string operations
+#include <iostream> // For I/O operations
+#include <memory.h> // For memory operations
+#include <stdarg.h> // For variable arguments
+#include <string>   // For string handling
+#include <time.h>   // For clock() function
 
-#include "chunk.h"
-#include "common.h"
-#include "compiler.h"
-#include "debug.h"
-#include "memory.h"
-#include "object.h"
-#include "value.h"
-#include "vm.h"
+#include "chunk.h"    // For bytecode chunks
+#include "common.h"   // For common definitions
+#include "compiler.h" // For code compilation
+#include "debug.h"    // For debugging utilities
+#include "memory.h"   // For memory management
+#include "object.h"   // For object system
+#include "value.h"    // For value representation
+#include "vm.h"       // For VM definitions
 
-// Since we are ever going to need only one VM. It is safe to use a global variable.
+// Single global VM instance
 VM vm;
 
+/**
+ * Native clock() function exposed to Delirium.
+ *
+ * @param argCount Number of arguments (must be 0)
+ * @param args Argument array (unused)
+ * @return Current time in seconds as number
+ */
 static Value clockNative(int argCount, Value* args)
 {
     return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
 }
 
+/**
+ * Resets the VM's call stack to empty state.
+ */
 static void resetStack()
 {
-    vm.stackTop = vm.stack;
-    vm.frameCount = 0;
+    vm.stackTop = vm.stack; // Reset stack pointer
+    vm.frameCount = 0;      // Clear call frames
 }
 
+/**
+ * Reports a runtime error with stack trace.
+ *
+ * @param format printf-style format string
+ * @param ... Variable arguments for message
+ */
 static void runtimeError(char const* format, ...)
 {
     va_list args;
@@ -37,9 +53,11 @@ static void runtimeError(char const* format, ...)
     va_end(args);
     fputs("\n", stderr);
 
+    // Print stack trace
     for (int i = vm.frameCount - 1; i >= 0; i--) {
         CallFrame* frame = &vm.frames[i];
         ObjFunction* function = frame->function;
+        // Calculate instruction offset in chunk
         size_t instruction = frame->ip - function->chunk.code - 1;
         fprintf(stderr, "[line %d] in ",
             function->chunk.lines[instruction]);
@@ -49,9 +67,16 @@ static void runtimeError(char const* format, ...)
             fprintf(stderr, "%s()\n", function->name->chars);
         }
     }
+
     resetStack();
 }
 
+/**
+ * Defines a native function in the global namespace.
+ *
+ * @param name Name of the native function
+ * @param function Pointer to native implementation
+ */
 static void defineNative(char const* name, NativeFn function)
 {
     push(OBJ_VAL(copyString(name, (int)strlen(name))));
@@ -61,53 +86,84 @@ static void defineNative(char const* name, NativeFn function)
     pop();
 }
 
+/**
+ * Initializes the virtual machine to empty state.
+ */
 void initVM()
 {
     resetStack();
-    vm.objects = NULL;
-    initTable(&vm.strings);
-    initTable(&vm.globals);
-    defineNative("clock", clockNative);
+    vm.objects = NULL;                  // Empty object list
+    initTable(&vm.strings);             // Empty string table
+    initTable(&vm.globals);             // Empty global namespace
+    defineNative("clock", clockNative); // Built-in clock()
 }
 
+/**
+ * Releases all resources used by the VM.
+ */
 void freeVM()
 {
-    freeTable(&vm.globals);
-    freeTable(&vm.strings);
-    freeObjects();
+    freeTable(&vm.globals); // Free global variables
+    freeTable(&vm.strings); // Free interned strings
+    freeObjects();          // Free all allocated objects
 }
 
+/**
+ * Pushes a value onto the VM's stack.
+ *
+ * @param value Value to push
+ */
 void push(Value value)
 {
-    *vm.stackTop = value;
-    vm.stackTop++;
+    *vm.stackTop = value; // Store value
+    vm.stackTop++;        // Move stack pointer
 }
 
+/**
+ * Pops a value from the VM's stack.
+ *
+ * @return The popped value
+ */
 Value pop()
 {
-    vm.stackTop--;
-    return *vm.stackTop;
+    vm.stackTop--;       // Move stack pointer
+    return *vm.stackTop; // Return value
 }
 
+/**
+ * Peeks at a value on the stack without popping it.
+ *
+ * @param distance Number of slots from top to peek (0 = top)
+ * @return The value at that stack position
+ */
 static Value peek(int distance)
 {
     return vm.stackTop[-1 - distance];
 }
 
+/**
+ * Calls a Delirium function.
+ *
+ * @param function Function to call
+ * @param argCount Number of arguments passed
+ * @return true if call succeeded, false on error
+ */
 static bool call(ObjFunction* function, int argCount)
 {
-
+    // Check arity
     if (argCount != function->arity) {
         runtimeError("Expected %d arguments but got %d.",
             function->arity, argCount);
         return false;
     }
 
+    // Check stack depth
     if (vm.frameCount == FRAMES_MAX) {
         runtimeError("Stack overflow.");
         return false;
     }
 
+    // Setup new call frame
     CallFrame* frame = &vm.frames[vm.frameCount++];
     frame->function = function;
     frame->ip = function->chunk.code;
@@ -115,6 +171,13 @@ static bool call(ObjFunction* function, int argCount)
     return true;
 }
 
+/**
+ * Calls any callable value (function or native).
+ *
+ * @param callee Callable value to invoke
+ * @param argCount Number of arguments
+ * @return true if call succeeded, false on error
+ */
 static bool callValue(Value callee, int argCount)
 {
     if (IS_OBJ(callee)) {
@@ -129,18 +192,27 @@ static bool callValue(Value callee, int argCount)
             return true;
         }
         default:
-            break; // Non-callable object type.
+            break; // Non-callable object type
         }
     }
     runtimeError("Can only call functions and classes.");
     return false;
 }
 
+/**
+ * Checks if a value is falsey (nil or false).
+ *
+ * @param value Value to check
+ * @return true if falsey, false otherwise
+ */
 static bool isFalsey(Value value)
 {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
+/**
+ * Concatenates two strings from the stack.
+ */
 static void concatenate()
 {
     ObjString* b = AS_STRING(pop());
@@ -148,7 +220,7 @@ static void concatenate()
 
     int length = a->length + b->length;
     char* chars = ALLOCATE(char, length + 1);
-    mempcpy(chars, a->chars, a->length);
+    memcpy(chars, a->chars, a->length);
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
 
@@ -156,10 +228,16 @@ static void concatenate()
     push(OBJ_VAL(result));
 }
 
+/**
+ * Runs the bytecode in the current call frame.
+ *
+ * @return Interpretation result status
+ */
 static InterpretResult run()
 {
     CallFrame* frame = &vm.frames[vm.frameCount - 1];
 
+// Bytecode reading macros
 #define READ_BYTE() (*frame->ip++)
 
 #define READ_SHORT() \
@@ -348,6 +426,12 @@ static InterpretResult run()
 #undef BINARY_OP
 }
 
+/**
+ * Interprets Delirium source code.
+ *
+ * @param source Source code to execute
+ * @return Interpretation result status
+ */
 InterpretResult interpret(char const* source)
 {
     ObjFunction* function = compile(source);

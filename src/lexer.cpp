@@ -1,16 +1,25 @@
-#include <cctype>
-#include <cstring>
+#include <cctype>  // For character classification functions
+#include <cstring> // For string operations
 
-#include "lexer.h"
+#include "lexer.h" // For token definitions
 
+// Lexer state structure
 typedef struct Lexer {
-    char const* start;
-    char const* current;
-    int line;
+    char const* start;   // Start of current token being scanned
+    char const* current; // Current position in source
+    int line;            // Current line number (1-based)
 } Lexer;
 
+// Global lexer state (single instance)
 Lexer lexer;
 
+/**
+ * Initializes the lexer with source code to tokenize.
+ *
+ * @param source Null-terminated source string
+ *
+ * @note Source must persist through tokenization
+ */
 void initLexer(char const* source)
 {
     lexer.start = source;
@@ -18,11 +27,17 @@ void initLexer(char const* source)
     lexer.line = 1;
 }
 
+/**
+ * Checks if lexer has reached end of input.
+ */
 static bool isAtEnd()
 {
     return *lexer.current == '\0';
 }
 
+/**
+ * Creates a token of given type from current lexer state.
+ */
 static Token makeToken(TokenType type)
 {
     Token token;
@@ -33,6 +48,9 @@ static Token makeToken(TokenType type)
     return token;
 }
 
+/**
+ * Creates an error token with message.
+ */
 static Token errorToken(char const* message)
 {
     Token token;
@@ -43,28 +61,39 @@ static Token errorToken(char const* message)
     return token;
 }
 
+/**
+ * Advances lexer and returns consumed character.
+ */
 static char advance()
 {
     lexer.current++;
     return *(lexer.current - 1);
 }
 
-static bool match(char const expected)
+/**
+ * Conditionally consumes character if it matches expected.
+ */
+static bool match(char expected)
 {
     if (isAtEnd())
         return false;
     if (*lexer.current != expected)
         return false;
-
     lexer.current++;
     return true;
 }
 
+/**
+ * Peeks at current character without consuming.
+ */
 static char peek()
 {
     return *lexer.current;
 }
 
+/**
+ * Peeks at next character without consuming.
+ */
 static char peekNext()
 {
     if (isAtEnd())
@@ -72,16 +101,25 @@ static char peekNext()
     return lexer.current[1];
 }
 
+/**
+ * Checks if character is a digit (0-9).
+ */
 static bool isDigit(char c)
 {
     return c >= '0' && c <= '9';
 }
 
+/**
+ * Checks if character is alphabetic (a-z, A-Z, _).
+ */
 static bool isAlpha(char c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
+/**
+ * Scans a string literal until closing quote.
+ */
 static Token string()
 {
     while (peek() != '"' && !isAtEnd()) {
@@ -93,19 +131,21 @@ static Token string()
     if (isAtEnd())
         return errorToken("Unterminated string.");
 
-    // Found the closing quote
-    advance();
+    advance(); // Consume closing quote
     return makeToken(TOKEN_STRING);
 }
 
+/**
+ * Scans numeric literals (integer or float).
+ */
 static Token number()
 {
     while (isDigit(peek()))
         advance();
 
-    // Look for a fraction part
+    // Handle fractional part
     if (peek() == '.' && isDigit(peekNext())) {
-        advance();
+        advance(); // Consume '.'
         while (isDigit(peek()))
             advance();
     }
@@ -113,17 +153,21 @@ static Token number()
     return makeToken(TOKEN_NUMBER);
 }
 
+/**
+ * Checks if current token matches a keyword.
+ */
 static TokenType checkKeyword(int start, int length,
     char const* rest, TokenType type)
 {
     if (lexer.current - lexer.start == start + length && memcmp(lexer.start + start, rest, length) == 0) {
         return type;
     }
-
     return TOKEN_IDENTIFIER;
 }
 
-// To add more TokenTypes edit this
+/**
+ * Determines if current identifier is a reserved keyword.
+ */
 static TokenType identifierType()
 {
     switch (lexer.start[0]) {
@@ -176,6 +220,9 @@ static TokenType identifierType()
     return TOKEN_IDENTIFIER;
 }
 
+/**
+ * Scans an identifier or keyword.
+ */
 static Token identifier()
 {
     while (isAlpha(peek()) || isDigit(peek()))
@@ -183,6 +230,9 @@ static Token identifier()
     return makeToken(identifierType());
 }
 
+/**
+ * Skips whitespace and comments.
+ */
 static void skipWhitespace()
 {
     for (;;) {
@@ -212,6 +262,9 @@ static void skipWhitespace()
     }
 }
 
+/**
+ * Scans and returns the next token from source.
+ */
 Token scanToken()
 {
     skipWhitespace();

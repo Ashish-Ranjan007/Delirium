@@ -22,6 +22,7 @@
 
 /**
  * Operator precedence levels used for Pratt parsing.
+ * Higher values indicate tighter binding.
  */
 typedef enum Precedence {
     PREC_NONE,
@@ -42,10 +43,10 @@ typedef enum Precedence {
  * error status, and panic mode for error recovery.
  */
 typedef struct Parser {
-    Token current;
-    Token previous;
-    bool hadError;
-    bool panicMode;
+    Token current;  // Current token being processed
+    Token previous; // Previous token processed
+    bool hadError;  // Whether an error occurred
+    bool panicMode; // Whether we're in error recovery mode
 } Parser;
 
 /* Function pointer type for parse rules */
@@ -56,28 +57,37 @@ typedef void (*ParseFn)(bool canAssign);
  * and precedence level for Pratt parsing.
  */
 typedef struct ParseRule {
-    ParseFn prefix;
-    ParseFn infix;
-    Precedence precedence;
+    ParseFn prefix;        // Function to handle token when it appears as prefix
+    ParseFn infix;         // Function to handle token when it appears as infix
+    Precedence precedence; // Operator precedence level
 } ParseRule;
 
+/**
+ * Represents a local variable in the current scope.
+ */
 typedef struct Local {
-    Token name;
-    int depth;
+    Token name; // Variable name token
+    int depth;  // Nesting depth of the variable (-1 if uninitialized)
 } Local;
 
+/**
+ * Type of function being compiled.
+ */
 typedef enum FunctionType {
-    TYPE_FUNCTION,
-    TYPE_SCRIPT
+    TYPE_FUNCTION, // User-defined function
+    TYPE_SCRIPT    // Top-level script
 } FunctionType;
 
+/**
+ * Compiler state for the current function being compiled.
+ */
 typedef struct Compiler {
-    struct Compiler* enclosing; // Potential Error
-    ObjFunction* function;
-    FunctionType type;
-    Local locals[UINT8_COUNT];
-    int localCount;
-    int scopeDepth;
+    struct Compiler* enclosing; // Compiler for enclosing function (linked list)
+    ObjFunction* function;      // Function object being compiled
+    FunctionType type;          // Function type
+    Local locals[UINT8_COUNT];  // Local variables in this function
+    int localCount;             // Number of locals
+    int scopeDepth;             // Current block nesting depth
 } Compiler;
 
 /* ====================== Global Variables ====================== */
@@ -178,11 +188,17 @@ static void consume(TokenType type, char const* message)
     errorAtCurrent(message); // Report an error if the expected token is missing.
 }
 
+/**
+ * Checks if the current token matches the given type.
+ */
 static bool check(TokenType type)
 {
     return parser.current.type == type;
 }
 
+/**
+ * Consumes the token if it matches the expected type.
+ */
 static bool match(TokenType type)
 {
 
@@ -212,6 +228,9 @@ static void emitBytes(uint8_t byte1, uint8_t byte2)
     emitByte(byte2);
 }
 
+/**
+ * Emits a loop instruction with jump offset.
+ */
 static void emitLoop(int loopStart)
 {
     emitByte(OP_LOOP);
@@ -224,6 +243,9 @@ static void emitLoop(int loopStart)
     emitByte(offset & 0xff);
 }
 
+/**
+ * Emits a jump instruction and returns the offset to patch later.
+ */
 static int emitJump(uint8_t instruction)
 {
     emitByte(instruction);
@@ -266,6 +288,9 @@ static void emitConstant(Value value)
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
+/**
+ * Patches a previously emitted jump instruction with the correct offset.
+ */
 static void patchJump(int offset)
 {
     // -2 to adjust for the bytecode for the jump offset itself.
@@ -279,6 +304,9 @@ static void patchJump(int offset)
     currentChunk()->code[offset + 1] = jump & 0xff;
 }
 
+/**
+ * Initializes a new compiler for a function.
+ */
 static void initCompiler(Compiler* compiler, FunctionType type)
 {
     compiler->enclosing = current;
@@ -319,6 +347,9 @@ static void number(bool canAssign)
     emitConstant(NUMBER_VAL(value));                    // Emit the constant into the bytecode.
 }
 
+/**
+ * Parses logical OR expressions.
+ */
 static void or_(bool canAssign)
 {
     int elseJump = emitJump(OP_JUMP_IF_FALSE);
@@ -331,6 +362,9 @@ static void or_(bool canAssign)
     patchJump(endJump);
 }
 
+/**
+ * Parses logical AND expressions.
+ */
 static void and_(bool canAssign)
 {
     int endJump = emitJump(OP_JUMP_IF_FALSE);
@@ -341,17 +375,26 @@ static void and_(bool canAssign)
     patchJump(endJump);
 }
 
+/**
+ * Parses string literals.
+ */
 static void string(bool canAssign)
 {
     emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
 }
 
+/**
+ * Creates a constant for an identifier name.
+ */
 static uint8_t identifierConstant(Token* name)
 {
     return makeConstant(OBJ_VAL(copyString(name->start,
         name->length)));
 }
 
+/**
+ * Checks if two identifiers are equal.
+ */
 static bool identifiersEqual(Token* a, Token* b)
 {
     if (a->length != b->length)
@@ -359,6 +402,9 @@ static bool identifiersEqual(Token* a, Token* b)
     return memcmp(a->start, b->start, a->length) == 0;
 }
 
+/**
+ * Resolves a local variable by name.
+ */
 static int resolveLocal(Compiler* compiler, Token* name)
 {
     for (int i = compiler->localCount - 1; i >= 0; i--) {
@@ -374,6 +420,9 @@ static int resolveLocal(Compiler* compiler, Token* name)
     return -1;
 }
 
+/**
+ * Adds a new local variable to the current scope.
+ */
 static void addLocal(Token name)
 {
     if (current->localCount == UINT8_COUNT) {
@@ -386,6 +435,9 @@ static void addLocal(Token name)
     local->depth = -1;
 }
 
+/**
+ * Declares a new variable in the current scope.
+ */
 static void declareVariable()
 {
     if (current->scopeDepth == 0)
@@ -406,6 +458,9 @@ static void declareVariable()
     addLocal(*name);
 }
 
+/**
+ * Parses an argument list for function calls.
+ */
 static uint8_t argumentList()
 {
     uint8_t argCount = 0;
@@ -424,6 +479,9 @@ static uint8_t argumentList()
     return argCount;
 }
 
+/**
+ * Parses a named variable reference or assignment.
+ */
 static void namedVariable(Token name, bool canAssign)
 {
     uint8_t getOp, setOp;
@@ -445,6 +503,9 @@ static void namedVariable(Token name, bool canAssign)
     }
 }
 
+/**
+ * Parses a variable reference.
+ */
 static void variable(bool canAssign)
 {
     namedVariable(parser.previous, canAssign);
@@ -483,6 +544,9 @@ static void unary(bool canAssign)
     }
 }
 
+/**
+ * Parses literal values (true, false, nil).
+ */
 static void literal(bool canAssign)
 {
     switch (parser.previous.type) {
@@ -548,6 +612,9 @@ static void binary(bool canAssign)
     }
 }
 
+/**
+ * Parses function calls.
+ */
 static void call(bool canAssign)
 {
     uint8_t argCount = argumentList();
@@ -618,6 +685,42 @@ static ParseRule* getRule(TokenType type)
 static ObjFunction* endCompiler();
 
 /**
+ * Parses a variable declaration.
+ */
+static uint8_t parseVariable(char const* errorMessage)
+{
+    consume(TOKEN_IDENTIFIER, errorMessage);
+
+    declareVariable();
+    if (current->scopeDepth > 0)
+        return 0;
+
+    return identifierConstant(&parser.previous);
+}
+
+/**
+ * Marks the current local variable as initialized.
+ */
+static void markInitialized()
+{
+    if (current->scopeDepth == 0)
+        return;
+    current->locals[current->localCount - 1].depth = current->scopeDepth;
+}
+
+/**
+ * Defines a variable in the current scope.
+ */
+static void defineVariable(uint8_t global)
+{
+    if (current->scopeDepth > 0) {
+        markInitialized();
+        return;
+    }
+    emitBytes(OP_DEFINE_GLOBAL, global);
+}
+
+/**
  * Parses an expression while respecting operator precedence.
  *
  * @param precedence The precedence level to start parsing at.
@@ -649,33 +752,6 @@ static void parsePrecedence(Precedence precedence)
     }
 }
 
-static uint8_t parseVariable(char const* errorMessage)
-{
-    consume(TOKEN_IDENTIFIER, errorMessage);
-
-    declareVariable();
-    if (current->scopeDepth > 0)
-        return 0;
-
-    return identifierConstant(&parser.previous);
-}
-
-static void markInitialized()
-{
-    if (current->scopeDepth == 0)
-        return;
-    current->locals[current->localCount - 1].depth = current->scopeDepth;
-}
-
-static void defineVariable(uint8_t global)
-{
-    if (current->scopeDepth > 0) {
-        markInitialized();
-        return;
-    }
-    emitBytes(OP_DEFINE_GLOBAL, global);
-}
-
 /**
  * Parses and compiles an expression.
  * Uses `parsePrecedence` to handle different levels of operator precedence.
@@ -685,11 +761,19 @@ static void expression()
     parsePrecedence(PREC_ASSIGNMENT); // Start parsing at the lowest precedence level.
 }
 
+/* ====================== Scope Management ====================== */
+
+/**
+ * Enters a new scope.
+ */
 static void beginScope()
 {
     current->scopeDepth++;
 }
 
+/**
+ * Exits the current scope.
+ */
 static void endScope()
 {
     current->scopeDepth--;
@@ -700,6 +784,11 @@ static void endScope()
     }
 }
 
+/* ====================== Statement Parsing ====================== */
+
+/**
+ * Parses a block statement.
+ */
 static void block()
 {
     while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
@@ -709,6 +798,9 @@ static void block()
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
+/**
+ * Parses a function declaration.
+ */
 static void function(FunctionType type)
 {
     Compiler compiler;
@@ -736,6 +828,9 @@ static void function(FunctionType type)
     emitBytes(OP_CONSTANT, makeConstant(OBJ_VAL(function)));
 }
 
+/**
+ * Parses a function declaration statement.
+ */
 static void funDeclaration()
 {
     uint8_t global = parseVariable("Expect function name");
@@ -744,6 +839,9 @@ static void funDeclaration()
     defineVariable(global);
 }
 
+/**
+ * Parses a variable declaration statement.
+ */
 static void varDeclaration()
 {
     uint8_t global = parseVariable("Expect variable name.");
@@ -759,6 +857,9 @@ static void varDeclaration()
     defineVariable(global);
 }
 
+/**
+ * Parses an expression statement.
+ */
 static void expressionStatement()
 {
     expression();
@@ -766,6 +867,9 @@ static void expressionStatement()
     emitByte(OP_POP);
 }
 
+/**
+ * Parses a for loop statement.
+ */
 static void forStatement()
 {
     beginScope();
@@ -815,6 +919,9 @@ static void forStatement()
     endScope();
 }
 
+/**
+ * Parses an if statement.
+ */
 static void ifStatement()
 {
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
@@ -835,6 +942,9 @@ static void ifStatement()
     patchJump(elseJump);
 }
 
+/**
+ * Parses a print statement.
+ */
 static void printStatement()
 {
     expression();
@@ -842,6 +952,9 @@ static void printStatement()
     emitByte(OP_PRINT);
 }
 
+/**
+ * Parses a return statement.
+ */
 static void returnStatement()
 {
     if (current->type == TYPE_SCRIPT) {
@@ -857,6 +970,9 @@ static void returnStatement()
     }
 }
 
+/**
+ * Parses a while statement.
+ */
 static void whileStatement()
 {
     int loopStart = currentChunk()->count;
@@ -873,6 +989,9 @@ static void whileStatement()
     emitByte(OP_POP);
 }
 
+/**
+ * Synchronizes the parser after an error.
+ */
 static void synchronize()
 {
     parser.panicMode = false;
@@ -898,6 +1017,9 @@ static void synchronize()
     }
 }
 
+/**
+ * Parses a statement.
+ */
 static void statement()
 {
     if (match(TOKEN_PRINT)) {
@@ -919,6 +1041,9 @@ static void statement()
     }
 }
 
+/**
+ * Parses a declaration (variable, function, or statement).
+ */
 static void declaration()
 {
     if (match(TOKEN_FUN)) {

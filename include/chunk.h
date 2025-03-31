@@ -1,55 +1,111 @@
-#ifndef chunk_h
-#define chunk_h
+#ifndef CHUNK_H
+#define CHUNK_H
 
-#include "common.h"
-#include "value.h"
+#include "common.h" // Common definitions and utilities
+#include "value.h"  // Value type definitions
 
-// 1-byte instruction set architecture for the Virtual Machine
-typedef enum Opcode {
-    OP_CONSTANT,
-    OP_NIL,
-    OP_TRUE,
-    OP_FALSE,
-    OP_POP,
-    OP_GET_LOCAL,
-    OP_SET_LOCAL,
-    OP_GET_GLOBAL,
-    OP_DEFINE_GLOBAL,
-    OP_SET_GLOBAL,
-    OP_EQUAL,
-    OP_GREATER,
-    OP_LESS,
-    OP_ADD,
-    OP_SUBTRACT,
-    OP_MULTIPLY,
-    OP_DIVIDE,
-    OP_NOT,
-    OP_MODULO,
-    OP_NEGATE,
-    OP_PRINT,
-    OP_JUMP,
-    OP_JUMP_IF_FALSE,
-    OP_LOOP,
-    OP_CALL,
-    OP_RETURN,
+// ======================
+// Bytecode Instruction Set
+// ======================
+
+/**
+ * Delirium Virtual Machine Opcodes (1-byte instructions)
+ *
+ * The VM is a stack-based machine with 1-byte opcodes.
+ * Some opcodes (like OP_CONSTANT) use subsequent bytes as operands.
+ */
+typedef enum OpCode {
+    // Constants and literals
+    OP_CONSTANT, // Loads constant from constant pool
+    OP_NIL,      // Pushes nil value
+    OP_TRUE,     // Pushes true value
+    OP_FALSE,    // Pushes false value
+
+    // Variable operations
+    OP_POP,           // Pops value from stack
+    OP_GET_LOCAL,     // Gets local variable by slot index
+    OP_SET_LOCAL,     // Sets local variable by slot index
+    OP_GET_GLOBAL,    // Gets global variable by name
+    OP_DEFINE_GLOBAL, // Defines new global variable
+    OP_SET_GLOBAL,    // Sets existing global variable
+
+    // Comparisons
+    OP_EQUAL,   // Equality comparison (==)
+    OP_GREATER, // Greater-than comparison (>)
+    OP_LESS,    // Less-than comparison (<)
+
+    // Arithmetic operations
+    OP_ADD,      // Addition (+)
+    OP_SUBTRACT, // Subtraction (-)
+    OP_MULTIPLY, // Multiplication (*)
+    OP_DIVIDE,   // Division (/)
+    OP_MODULO,   // Modulo (%)
+    OP_NEGATE,   // Unary negation (-)
+
+    // Logical operations
+    OP_NOT, // Logical NOT (!)
+
+    // I/O and control flow
+    OP_PRINT,         // Prints stack value
+    OP_JUMP,          // Unconditional jump
+    OP_JUMP_IF_FALSE, // Conditional jump (if false)
+    OP_LOOP,          // Jump backward (for loops)
+    OP_CALL,          // Calls function
+    OP_RETURN,        // Returns from function
 } OpCode;
 
-/*
- * The `Chunk` is a container for the low-level instructions that the VM will execute.
- * It handles the dynamic memory management of those instructions.
- * It is the compiled result of the source code, ready for execution.
- * */
+// ======================
+// Bytecode Chunk Structure
+// ======================
+
+/**
+ * Represents a sequence of bytecode instructions and associated data.
+ *
+ * A chunk is the compiled representation of source code that the VM executes.
+ * It uses dynamic arrays to grow as needed during compilation.
+ */
 typedef struct Chunk {
-    int count;            // Number of bytecode instructions that are currently present in the code array.
-    int capacity;         // Total allocated size of the code array.
-    uint8_t* code;        // Each byte in this dynacmically allocated array represents a single bytecode instruction.
-    ValueArray constants; // Stores a pool of constants or the "constant pool".
-    int* lines;           // Each index in this array is the line number for the corresponding byte in the bytecode.
+    int count;            // Current number of bytes in use
+    int capacity;         // Total allocated size of code array
+    uint8_t* code;        // Dynamic array of bytecode instructions
+    ValueArray constants; // Constant pool (literals, strings, etc)
+    int* lines;           // Source line numbers for each instruction (debugging)
 } Chunk;
 
-void initChunk(Chunk* chunk);                          // Initialize new chunk
-void writeChunk(Chunk* chunk, uint8_t byte, int line); // Append a new byte to the end of the chunk
-void freeChunk(Chunk* chunk);                          // Free Chunk of memory
-int addConstant(Chunk* chunk, Value value);            //  Add a new constant to the constant pool
+// ======================
+// Chunk API
+// ======================
 
-#endif
+/**
+ * Initializes a new empty chunk.
+ *
+ * @param chunk Pointer to uninitialized chunk
+ */
+void initChunk(Chunk* chunk);
+
+/**
+ * Appends a byte to the chunk's instruction stream.
+ *
+ * @param chunk Target chunk
+ * @param byte  Instruction byte or operand to append
+ * @param line  Source line number for debugging
+ */
+void writeChunk(Chunk* chunk, uint8_t byte, int line);
+
+/**
+ * Releases all memory owned by a chunk.
+ *
+ * @param chunk Chunk to deallocate
+ */
+void freeChunk(Chunk* chunk);
+
+/**
+ * Adds a constant value to the chunk's constant pool.
+ *
+ * @param chunk Target chunk
+ * @param value Value to add (number, string, etc)
+ * @return Index of the constant in the pool
+ */
+int addConstant(Chunk* chunk, Value value);
+
+#endif // CHUNK_H
