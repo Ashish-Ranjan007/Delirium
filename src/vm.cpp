@@ -10,10 +10,12 @@
 #include "common.h"   // For common definitions
 #include "compiler.h" // For code compilation
 #include "debug.h"    // For debugging utilities
-#include "memory.h"   // For memory management
-#include "object.h"   // For object system
-#include "value.h"    // For value representation
-#include "vm.h"       // For VM definitions
+#include "lexer.h"
+#include "memory.h" // For memory management
+#include "mutator.h"
+#include "object.h" // For object system
+#include "value.h"  // For value representation
+#include "vm.h"     // For VM definitions
 
 // Single global VM instance
 VM vm;
@@ -47,6 +49,14 @@ static void resetStack()
  */
 static void runtimeError(char const* format, ...)
 {
+#ifdef DEBUG_MUTATE_CODE
+    // Get current lexer state
+    char const* lex = getLexer();
+    Mutator mut = Mutator(lex);
+    mut.printSource();
+    return;
+#endif
+
     va_list args;
     va_start(args, format);
     vfprintf(stderr, format, args);

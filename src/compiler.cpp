@@ -11,6 +11,7 @@
 #include "compiler.h"
 #include "debug.h"
 #include "lexer.h"
+#include "mutator.h"
 #include "object.h"
 #include "value.h"
 
@@ -118,9 +119,17 @@ static Chunk* currentChunk()
  */
 static void errorAt(Token* token, char const* message)
 {
+    // Get current lexer state
+    char const* lex = getLexer();
+    Mutator mut = Mutator(lex);
+    mut.printSource();
+
     if (parser.panicMode)
         return;
     parser.panicMode = true;
+    parser.hadError = true;
+
+#ifndef DEBUG_MUTATE_CODE
     std::cerr << "[line " << token->line << "] Error";
 
     if (token->type == TOKEN_EOF) {
@@ -132,7 +141,7 @@ static void errorAt(Token* token, char const* message)
     }
 
     std::cerr << ": " << message << std::endl;
-    parser.hadError = true;
+#endif
 }
 
 /**

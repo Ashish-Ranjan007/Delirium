@@ -27,6 +27,7 @@ set(SOURCES
     src/lexer.cpp
     src/object.cpp
     src/table.cpp
+    src/mutator.cpp
 )
 
 set(HEADERS
@@ -41,6 +42,7 @@ set(HEADERS
     include/lexer.h
     include/object.h
     include/table.h
+    include/mutator.h
 )
 
 # Define executable

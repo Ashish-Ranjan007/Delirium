@@ -3,15 +3,13 @@
 
 #include "lexer.h" // For token definitions
 
-// Lexer state structure
-typedef struct Lexer {
-    char const* start;   // Start of current token being scanned
-    char const* current; // Current position in source
-    int line;            // Current line number (1-based)
-} Lexer;
-
 // Global lexer state (single instance)
-Lexer lexer;
+static Lexer lexer;
+
+char const* getLexer()
+{
+    return lexer.source;
+}
 
 /**
  * Initializes the lexer with source code to tokenize.
@@ -25,6 +23,7 @@ void initLexer(char const* source)
     lexer.start = source;
     lexer.current = source;
     lexer.line = 1;
+    lexer.source = source;
 }
 
 /**

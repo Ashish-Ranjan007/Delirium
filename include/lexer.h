@@ -79,6 +79,17 @@ typedef struct Token {
     int line;          // Source line number (1-based)
 } Token;
 
+// Lexer state structure
+typedef struct Lexer {
+    char const* start;   // Start of current token being scanned
+    char const* current; // Current position in source
+    int line;            // Current line number (1-based)
+    char const* source;
+} Lexer;
+
+// Change from extern variable to function access
+char const* getLexer(); // Add this declaration
+
 /**
  * Initializes the lexer with source code to tokenize.
  *
