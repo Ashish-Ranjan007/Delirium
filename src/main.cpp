@@ -18,34 +18,16 @@
  */
 int main(int argc, char** argv)
 {
-    /*
-    try {
-        std::vector<std::string> args(argv, argv + argc);
-
-        if (args.size() != 2) {
-            std::cerr << "Usage: " << args.front() << " [script.dlm]\n";
-            return Delirium::ExitCodes::USAGE_ERROR;
-        }
-
-        Delirium::runFile(args[1]);
-        return Delirium::ExitCodes::SUCCESS;
-    } catch (std::exception const& e) {
-        std::cerr << "Fatal error: " << e.what() << '\n';
-        return Delirium::ExitCodes::RUNTIME_ERROR;
-    }
-
-*/
-
     Bytecode bytecode;
 
     int constant = bytecode.appendConstant(1.2);
-    bytecode.appendBytecode(Delirium::OP_CONSTANT);
-    bytecode.appendBytecode(constant);
+    bytecode.appendBytecode(Delirium::OP_CONSTANT, 123);
+    bytecode.appendBytecode(constant, 123);
 
     int const1 = bytecode.appendConstant(1.3);
-    bytecode.appendBytecode(Delirium::OP_CONSTANT);
-    bytecode.appendBytecode(const1);
+    bytecode.appendBytecode(Delirium::OP_CONSTANT, 123);
+    bytecode.appendBytecode(const1, 123);
 
-    bytecode.appendBytecode(Delirium::OP_RETURN);
+    bytecode.appendBytecode(Delirium::OP_RETURN, 123);
     Delirium::disassembleBytecode(bytecode, "test chunk");
 }

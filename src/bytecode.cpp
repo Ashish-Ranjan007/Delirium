@@ -15,15 +15,21 @@ Bytecode::~Bytecode()
     // Cleanup code for the Bytecode object
 }
 
-void Bytecode::appendBytecode(uint8_t byte)
+void Bytecode::appendBytecode(uint8_t byte, int line)
 {
     code.push_back(byte);
+    lines.push_back(line);
 }
 
 int Bytecode::appendConstant(Delirium::Value value)
 {
     constants.push_back(value);
     return constants.size() - 1;
+}
+
+std::vector<int> const& Bytecode::getLine() const
+{
+    return lines;
 }
 
 std::vector<uint8_t> const& Bytecode::getBytecode() const
