@@ -5,20 +5,20 @@
  *
  */
 
-#include <iostream>
-#include <vector>
-
-#include "delirium.hpp"
+#include "bytecode.hpp"
+#include "disassembler.hpp"
+#include "opcode.hpp"
 
 /*
  * Main program entry point.
  *
  * @param argc Argument count
- * @param argv Argument vector
+ * @param argv Argumet vector
  * @return Appropriate exit code based on program execution
  */
 int main(int argc, char** argv)
 {
+    /*
     try {
         std::vector<std::string> args(argv, argv + argc);
 
@@ -33,4 +33,10 @@ int main(int argc, char** argv)
         std::cerr << "Fatal error: " << e.what() << '\n';
         return Delirium::ExitCodes::RUNTIME_ERROR;
     }
+
+*/
+
+    Bytecode bytecode;
+    bytecode.appendCode(Delirium::OP_RETURN);
+    Delirium::disassembleBytecode(bytecode, "test chunk");
 }

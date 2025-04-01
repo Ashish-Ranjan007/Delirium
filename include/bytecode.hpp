@@ -1,10 +1,19 @@
-#ifndef BYTECODE_H
-#define BYTECODE_H
+#ifndef BYTECODE_HPP
+#define BYTECODE_HPP
 
-#include "delirium.hpp"
+#include <cstdint>
+#include <vector>
 
-typedef enum Opcode {
-    OP_RETURN,
-} Opcode;
+class Bytecode {
+
+private:
+    std::vector<uint8_t> code;
+
+public:
+    Bytecode();
+    ~Bytecode();
+    void appendCode(uint8_t byte);
+    std::vector<uint8_t> const& getCode() const;
+};
 
 #endif

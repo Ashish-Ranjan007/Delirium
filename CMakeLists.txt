@@ -18,11 +18,14 @@ endif()
 # Add source files
 set(SOURCES
     src/main.cpp
-    src/delirium.cpp
+    src/disassembler.cpp
+    src/bytecode.cpp 
 )
 
 set(HEADERS
-    include/delirium.hpp
+    include/disassembler.hpp
+    include/bytecode.hpp
+    include/opcode.hpp
 )
 
 # Define executable
