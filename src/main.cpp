@@ -1,81 +1,36 @@
-// main.cpp - Main entry point for the Delirium language interpreter
-// Bytecode virtual machine implementation for the Delirium programming language
-
-#include <cstdlib>  // For exit() and EXIT_* codes
-#include <cstring>  // For string operations
-#include <fstream>  // For file I/O
-#include <ios>      // For std::ios flags
-#include <iostream> // For std::cerr
-
-#include "vm.h" // Delirium Virtual Machine implementation
-
-/**
- * Reads the contents of a Delirium source file into memory.
+/*
+ * Delirium Programming Language - Main entry point and file handling
  *
- * @param path Path to the .del source file
- * @return Dynamically allocated buffer containing the source code
- * @throws Exits with status 74 (EX_IOERR) on file operations failure
+ * This file contains the main program logic for the Delirium programming language.
+ *
  */
-static std::string readFile(std::string const& path) // Accept std::string
-{
-    std::ifstream file(path, std::ios::binary);
-    if (!file) {
-        std::cerr << "[Delirium] Could not open file: " << path << std::endl;
-        exit(74);
-    }
 
-    std::string source((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+#include <iostream>
+#include <vector>
 
-    if (source.empty()) {
-        std::cerr << "[Delirium] Invalid file size for: " << path << std::endl;
-        exit(74);
-    }
+#include "delirium.hpp"
 
-    return source;
-}
-
-/**
- * Executes a Delirium source file.
+/*
+ * Main program entry point.
  *
- * @param path Path to the .del file to execute
- * @throws Exits with status 65 (EX_DATAERR) for syntax errors,
- *         70 (EX_SOFTWARE) for runtime errors
- */
-static void runFile(std::string const& path)
-{
-    std::string source = readFile(path);
-    InterpretResult result = interpret(source.c_str()); // `c_str()` is needed here
-
-    if (result == INTERPRET_COMPILE_ERROR)
-        exit(65);
-    if (result == INTERPRET_RUNTIME_ERROR)
-        exit(70);
-}
-
-/**
- * Delirium Language Interpreter
- * ============================
- * Usage:
- *   delirium [script.del]
- *
- * Exit Codes:
- *   0 - Success
- *   64 - Command line usage error
- *   65 - Compilation error (invalid syntax)
- *   70 - Runtime error
- *   74 - I/O error (file operations)
+ * @param argc Argument count
+ * @param argv Argument vector
+ * @return Appropriate exit code based on program execution
  */
 int main(int argc, char** argv)
 {
-    initVM();
+    try {
+        std::vector<std::string> args(argv, argv + argc);
 
-    if (argc == 2) {
-        runFile(argv[1]);
-    } else {
-        std::cerr << "Delirium Language Interpreter\nUsage: delirium [script.dlm]\n";
-        exit(64);
+        if (args.size() != 2) {
+            std::cerr << "Usage: " << args.front() << " [script.dlm]\n";
+            return Delirium::ExitCodes::USAGE_ERROR;
+        }
+
+        Delirium::runFile(args[1]);
+        return Delirium::ExitCodes::SUCCESS;
+    } catch (std::exception const& e) {
+        std::cerr << "Fatal error: " << e.what() << '\n';
+        return Delirium::ExitCodes::RUNTIME_ERROR;
     }
-
-    freeVM();
-    return 0;
 }

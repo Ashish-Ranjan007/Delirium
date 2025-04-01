@@ -18,31 +18,11 @@ endif()
 # Add source files
 set(SOURCES
     src/main.cpp
-    src/chunk.cpp
-    src/memory.cpp
-    src/debug.cpp
-    src/value.cpp
-    src/vm.cpp
-    src/compiler.cpp
-    src/lexer.cpp
-    src/object.cpp
-    src/table.cpp
-    src/mutator.cpp
+    src/delirium.cpp
 )
 
 set(HEADERS
-    include/lexer.h
-    include/chunk.h
-    include/common.h
-    include/memory.h
-    include/debug.h
-    include/value.h
-    include/vm.h
-    include/compiler.h 
-    include/lexer.h
-    include/object.h
-    include/table.h
-    include/mutator.h
+    include/delirium.hpp
 )
 
 # Define executable
