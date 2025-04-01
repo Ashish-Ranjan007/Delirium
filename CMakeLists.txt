@@ -19,13 +19,15 @@ endif()
 set(SOURCES
     src/main.cpp
     src/disassembler.cpp
-    src/bytecode.cpp 
+    src/bytecode.cpp
+    src/type.cpp
 )
 
 set(HEADERS
     include/disassembler.hpp
     include/bytecode.hpp
     include/opcode.hpp
+    include/type.hpp
 )
 
 # Define executable

@@ -3,25 +3,35 @@
 #include <vector>
 
 #include "bytecode.hpp"
+#include "type.hpp"
 
 Bytecode::Bytecode()
 {
-    // Initialization code for the Bytecode object, if any.
     // In this case, the default constructor of std::vector is likely sufficient.
 }
 
 Bytecode::~Bytecode()
 {
-    // Cleanup code for the Bytecode object, if needed.
-    // std::vector handles its own memory management.
+    // Cleanup code for the Bytecode object
 }
 
-void Bytecode::appendCode(uint8_t byte)
+void Bytecode::appendBytecode(uint8_t byte)
 {
     code.push_back(byte);
 }
 
-std::vector<uint8_t> const& Bytecode::getCode() const
+int Bytecode::appendConstant(Delirium::Value value)
+{
+    constants.push_back(value);
+    return constants.size() - 1;
+}
+
+std::vector<uint8_t> const& Bytecode::getBytecode() const
 {
     return code;
+}
+
+std::vector<Delirium::Value> const& Bytecode::getConstant() const
+{
+    return constants;
 }

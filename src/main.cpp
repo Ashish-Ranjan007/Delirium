@@ -37,6 +37,15 @@ int main(int argc, char** argv)
 */
 
     Bytecode bytecode;
-    bytecode.appendCode(Delirium::OP_RETURN);
+
+    int constant = bytecode.appendConstant(1.2);
+    bytecode.appendBytecode(Delirium::OP_CONSTANT);
+    bytecode.appendBytecode(constant);
+
+    int const1 = bytecode.appendConstant(1.3);
+    bytecode.appendBytecode(Delirium::OP_CONSTANT);
+    bytecode.appendBytecode(const1);
+
+    bytecode.appendBytecode(Delirium::OP_RETURN);
     Delirium::disassembleBytecode(bytecode, "test chunk");
 }

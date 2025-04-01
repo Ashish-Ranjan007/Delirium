@@ -4,6 +4,7 @@
 namespace Delirium {
 
 typedef enum Opcode {
+    OP_CONSTANT,
     OP_RETURN,
 } Opcode;
 
