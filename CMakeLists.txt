@@ -43,6 +43,7 @@ set(HEADERS
     include/object.h
     include/table.h
     include/mutator.h
+    include/mutationConstants.h
 )
 
 # Define executable

@@ -43,8 +43,15 @@ static std::string readFile(std::string const& path) // Accept std::string
  */
 static void runFile(std::string const& path)
 {
+    // Check if file has .del extension
+    if (path.size() < 4 || path.substr(path.size() - 4) != ".del") {
+        std::cerr << "[Delirium] Error: File must have .del extension\n";
+        exit(64);
+    }
+
     std::string source = readFile(path);
-    InterpretResult result = interpret(source.c_str()); // `c_str()` is needed here
+    std::string modifiablePath = path;
+    InterpretResult result = interpret(source.c_str(), modifiablePath);
 
     if (result == INTERPRET_COMPILE_ERROR)
         exit(65);

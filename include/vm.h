@@ -80,6 +80,12 @@ typedef enum InterpretResult {
  */
 extern VM vm;
 
+/**
+ * Single global source path instance for code mutation.
+ * Extern declaration - actual storage is in vm.c.
+ */
+extern std::string sourcePath;
+
 // ======================
 // Public API
 // ======================
@@ -102,7 +108,7 @@ void freeVM();
  * @param source Null-terminated source code string
  * @return Interpretation result code
  */
-InterpretResult interpret(char const* source);
+InterpretResult interpret(char const* source, std::string& path);
 
 /**
  * Pushes a value onto the VM's stack.

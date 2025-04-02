@@ -195,7 +195,16 @@ static TokenType identifierType()
     case 'o':
         return checkKeyword(1, 1, "r", TOKEN_OR);
     case 'p':
-        return checkKeyword(1, 4, "rint", TOKEN_PRINT);
+        if (lexer.current - lexer.start > 1) {
+            switch (lexer.start[1]) {
+            case 'r':
+                if (lexer.current - lexer.start > 5 && memcmp(lexer.start + 2, "intln", 5) == 0) {
+                    return TOKEN_PRINTLN;
+                }
+                return checkKeyword(2, 3, "int", TOKEN_PRINT);
+            }
+        }
+        break;
     case 'r':
         return checkKeyword(1, 5, "eturn", TOKEN_RETURN);
     case 's':

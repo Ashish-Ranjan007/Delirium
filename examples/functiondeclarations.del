@@ -1,5 +1,5 @@
 fun areWeHavingItYet() {
-  print "Yes we are!";
+  println "Yes we are!";
 }
 
-print areWeHavingItYet;
+println areWeHavingItYet;

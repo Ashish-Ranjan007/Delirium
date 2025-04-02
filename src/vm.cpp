@@ -19,6 +19,7 @@
 
 // Single global VM instance
 VM vm;
+std::string sourcePath;
 
 /**
  * Native clock() function exposed to Delirium.
@@ -50,10 +51,11 @@ static void resetStack()
 static void runtimeError(char const* format, ...)
 {
 #ifdef DEBUG_MUTATE_CODE
-    // Get current lexer state
     char const* lex = getLexer();
-    Mutator mut = Mutator(lex);
-    mut.printSource();
+    Mutator mut = Mutator(lex, sourcePath);
+    mut.mutateCode();
+
+    resetStack();
     return;
 #endif
 
@@ -385,9 +387,12 @@ static InterpretResult run()
             }
             push(NUMBER_VAL(-AS_NUMBER(pop())));
             break;
-        case OP_PRINT:
+        case OP_PRINTLN:
             printValue(pop());
             std::cout << std::endl;
+            break;
+        case OP_PRINT:
+            printValue(pop());
             break;
         case OP_JUMP: {
             uint16_t offset = READ_SHORT();
@@ -442,8 +447,9 @@ static InterpretResult run()
  * @param source Source code to execute
  * @return Interpretation result status
  */
-InterpretResult interpret(char const* source)
+InterpretResult interpret(char const* source, std::string& path)
 {
+    sourcePath = path;
     ObjFunction* function = compile(source);
     if (function == NULL)
         return INTERPRET_COMPILE_ERROR;

@@ -47,6 +47,7 @@ typedef enum OpCode {
 
     // I/O and control flow
     OP_PRINT,         // Prints stack value
+    OP_PRINTLN,       // Prints new line
     OP_JUMP,          // Unconditional jump
     OP_JUMP_IF_FALSE, // Conditional jump (if false)
     OP_LOOP,          // Jump backward (for loops)

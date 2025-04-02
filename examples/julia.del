@@ -1,0 +1,47 @@
+// Julia Set Fractal Generator (Delirium-compatible)
+fun renderJulia() {
+    var width = 100;
+    var height = 100;
+    var max_iter = 100;
+    var c_real = -0.7;
+    var c_imag = 0.27;
+    
+    // Gradient as individual characters
+    var dot = " ";
+    var colon = ":";
+    var equal = "=";
+    var plus = "+";
+    var star = "*";
+    var hash = "#";
+    var percent = "%";
+    var at = "@";
+
+    for (var y = 0; y < height; y = y + 1) {
+        for (var x = 0; x < width; x = x + 1) {
+            var zx = (x - width/2) * 4.0 / width;
+            var zy = (y - height/2) * 4.0 / height;
+            var iter = 0;
+            
+            while (zx*zx + zy*zy < 4.0 and iter < max_iter) {
+                var tmp = zx*zx - zy*zy + c_real;
+                zy = 2.0*zx*zy + c_imag;
+                zx = tmp;
+                iter = iter + 1;
+            }
+            
+            // Manual gradient mapping
+            if (iter < 10) { print dot; }
+            else if (iter < 20) { print colon; }
+            else if (iter < 30) { print equal; }
+            else if (iter < 40) { print plus; }
+            else if (iter < 50) { print star; }
+            else if (iter < 70) { print hash; }
+            else if (iter < 90) { print percent; }
+            else { print at; }
+        }
+        println " "; // Newline after each row
+    }
+}
+
+// Execute
+renderJulia();

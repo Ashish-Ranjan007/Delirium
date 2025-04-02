@@ -14,10 +14,14 @@
 #include "mutator.h"
 #include "object.h"
 #include "value.h"
+#include "vm.h"
 
 #ifdef DEBUG_PRINT_CODE
 #    include "debug.h"
 #endif
+
+/* ==================================================================== */
+bool canMutate = true; // Mutation is run when true
 
 /* ====================== Parser Types and State ====================== */
 
@@ -119,17 +123,22 @@ static Chunk* currentChunk()
  */
 static void errorAt(Token* token, char const* message)
 {
-    // Get current lexer state
-    char const* lex = getLexer();
-    Mutator mut = Mutator(lex);
-    mut.printSource();
+#ifdef DEBUG_MUTATE_CODE
+    if (canMutate) {
+        char const* lex = getLexer();
+        Mutator mut = Mutator(lex, sourcePath);
+        mut.mutateCode();
+        canMutate = false;
+    }
 
     if (parser.panicMode)
         return;
     parser.panicMode = true;
     parser.hadError = true;
 
-#ifndef DEBUG_MUTATE_CODE
+    return;
+#endif
+
     std::cerr << "[line " << token->line << "] Error";
 
     if (token->type == TOKEN_EOF) {
@@ -141,7 +150,6 @@ static void errorAt(Token* token, char const* message)
     }
 
     std::cerr << ": " << message << std::endl;
-#endif
 }
 
 /**
@@ -210,7 +218,6 @@ static bool check(TokenType type)
  */
 static bool match(TokenType type)
 {
-
     if (!check(type))
         return false;
     advance();
@@ -668,6 +675,7 @@ ParseRule rules[] = {
     [TOKEN_NIL] = { literal, NULL, PREC_NONE },
     [TOKEN_OR] = { NULL, or_, PREC_OR },
     [TOKEN_PRINT] = { NULL, NULL, PREC_NONE },
+    [TOKEN_PRINTLN] = { NULL, NULL, PREC_NONE },
     [TOKEN_RETURN] = { NULL, NULL, PREC_NONE },
     [TOKEN_SUPER] = { NULL, NULL, PREC_NONE },
     [TOKEN_THIS] = { NULL, NULL, PREC_NONE },
@@ -951,6 +959,13 @@ static void ifStatement()
     patchJump(elseJump);
 }
 
+static void printlnStatement()
+{
+    expression();
+    consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+    emitByte(OP_PRINTLN);
+}
+
 /**
  * Parses a print statement.
  */
@@ -1031,7 +1046,9 @@ static void synchronize()
  */
 static void statement()
 {
-    if (match(TOKEN_PRINT)) {
+    if (match(TOKEN_PRINTLN)) {
+        printlnStatement();
+    } else if (match(TOKEN_PRINT)) {
         printStatement();
     } else if (match(TOKEN_FOR)) {
         forStatement();

@@ -30,12 +30,10 @@ A **schizophrenic**, **self-mutating**, and **untrustworthy** programming langua
         5.  **Unrelated lines of code switch places**, causing total chaos.
         6.  **Operators get randomly replaced** (`+` → `-`, `*` → `/`).
         7.  **A line is suddenly commented out**, for no clear reason.
-        8.  **Functions are cloned with slight corruption**, creating "ghost" versions.
-        9.  **Formatting is destroyed**, replacing all indentation with spaces or randomizing line breaks.
-        10. **Random, useless functions appear**, seemingly important but utterly nonsensical.
-        11. **Infinite Mutation Mode**: Delirium keeps **mutating itself indefinitely**, spiraling into complete nonsense.
-        12. **ASCII art of the AST emerges in place of code.**
-        13. **Final Crash Mode**: The compiler crashes, printing either an irrelevant error or an insult.
+        8.  **Formatting is destroyed**, replacing all indentation with spaces or randomizing line breaks.
+        9. **Random, useless functions appear**, seemingly important but utterly nonsensical.
+        10. **ASCII art of the AST emerges in place of code.**
+        11. **Final Crash Mode**: The compiler crashes, printing either an irrelevant error or an insult.
 
 #### **3. Codebase Decay & Entropy** 📉👻
 

@@ -2,9 +2,9 @@ var a = "Hello,";
 var b = "World!";
 
 if(1 > 2) {
-    print "Inside if statement";
-    print a + " " + b;
+    println "Inside if statement";
+    println a + " " + b;
 } else {
-    print "Inside else clause";
-    print a + " " + b;
+    println "Inside else clause";
+    println a + " " + b;
 }
